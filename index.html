@@ -6,14 +6,12 @@
 <body>
 	<h1>Signer IPA</h1>
 	<form method="POST" enctype="multipart/form-data" action="signer.php">
-		<label>Nom de l'application :</label><br>
-		<input type="text" name="appName" required><br><br>
-		<label>Identifiant de bundle :</label><br>
-		<input type="text" name="appBundleId" required><br><br>
 		<label>Certificat (.p12) :</label><br>
 		<input type="file" name="certificate" required><br><br>
 		<label>Mot de passe du certificat :</label><br>
 		<input type="password" name="password" required><br><br>
+		<label>Fichier mobileprovision :</label><br>
+		<input type="file" name="mobileprovision" required><br><br>
 		<label>Fichier IPA :</label><br>
 		<input type="file" name="ipaFile" required><br><br>
 		<input type="submit" value="Signer l'IPA">
