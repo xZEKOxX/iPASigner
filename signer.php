@@ -5,10 +5,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $file = $_FILES["ipaFile"]["tmp_name"];
 
     // informations de signature
-    $appName = $_POST["appName"];
-    $appBundleId = $_POST["appBundleId"];
     $certificate = $_FILES["certificate"]["tmp_name"];
     $password = $_POST["password"];
+    $mobileprovision = $_FILES["mobileprovision"]["tmp_name"];
 
     // chargement du fichier .ipa
     $data = file_get_contents($file);
@@ -20,8 +19,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $zip->close();
     }
 
+    // récupération du nom de l'application et de l'identifiant de bundle depuis le fichier Info.plist
+    $infoPlistData = file_get_contents("mon-dossier-temporaire/Payload/*.app/Info.plist");
+    $infoPlist = new SimpleXMLElement($infoPlistData);
+    $appName = (string) $infoPlist->CFBundleExecutable;
+    $appBundleId = (string) $infoPlist->CFBundleIdentifier;
+
+    // chargement du fichier de provisionnement mobile
+    $mobileprovisionData = file_get_contents($mobileprovision);
+
+    // écriture du fichier de provisionnement mobile dans le dossier temporaire
+    $fp = fopen("mon-dossier-temporaire/embedded.mobileprovision", "w");
+    fwrite($fp, $mobileprovisionData);
+    fclose($fp);
+
     // signature de l'application
-    $cmd = "codesign -f -s \"".$certificate."\" --keychain login.keychain --entitlements entitlements.plist mon-dossier-temporaire/Payload/".$appName.".app";
+    $cmd = "codesign -f -s \"".$certificate."\" --keychain login.keychain --entitlements entitlements.plist --provisioning-profile mon-dossier-temporaire/embedded.mobileprovision mon-dossier-temporaire/Payload/".$appName.".app";
     exec($cmd);
 
     // création d'un fichier .ipa signé
